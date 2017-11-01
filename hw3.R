@@ -1,5 +1,4 @@
-# Name: Yan Huang
-# Email: huang382@wisc.edu
+
 
 rm(list = ls())
 
