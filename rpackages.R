@@ -1,20 +1,7 @@
-library(readr)
-iris <- read.csv(url("http://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"), header = FALSE) 
-iris <- read.table('guidedata.rdata',header=T)
-iris <- read.table('traindata.rdata',header=T)
-iris <- read.table('data_imputed.rdata',header=T)
-iris <- guidedata
-iris <- z
-iris.train <- z
-iris.test <- guidedata
-iris.test <- test
 train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
 iris.train <- iris[train.idx, ]
 iris.test <- iris[-train.idx, ]
 
-
-iris.train <- iris[(1:2922), ]
-iris.test <- iris[(2923:13597), ]
 
 head(iris)
 train.idx <- sample(nrow(iris), 2/3 * nrow(iris))
