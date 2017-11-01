@@ -1,0 +1,389 @@
+---
+title: "Research on Bike Sharing Systems"
+author: "???? 2014201507  ??���? 2016201762"
+date: "2017??7??1??"
+runtime: shiny
+output: 
+  ioslides_presentation:
+    incremental: yes
+    logo: RUC-logo.png
+    theme: sandstone
+    widescreen: yes
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+# Introduction
+
+##Introduction
+***Bike sharing*** systems are new generation of traditional bike rentals where whole process from membership, rental and return back has become automatic. Through these systems, user is able to easily rent a bike from a particular position and return back at another position. Currently, there are about over 500 bike-sharing programs around the world which is composed of over 500 thousands bicycles. Today, there exists great interest in these systems due to their important role in traffic, environmental and health issues.  
+  
+The bikeshare system being studied in detail in this report is `Capital Bikeshare` which is a system based in Washington DC.[Official Website of Capital Bikeshare](https://www.capitalbikeshare.com/) 
+
+
+
+##Capital Bikeshare
+
+```{r, echo=FALSE, fig.retina=0.3,fig.align='center',fig.cap="Capital Bikeshare"}
+knitr::include_graphics("CapitalBikeshare.jpg")
+```
+
+
+##Introductary Video to Capital Bikeshare
+
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+library("vembedr")
+library("htmltools")
+div(
+  align = "center", 
+  embed_youtube(id = "vu2Du_P9rHw", width = 640,  height = 390)
+)
+```
+
+
+
+## Packages Used in this Report{.smaller}
+ 
+  vembedr  
+  htmltools  
+  DT  
+  ggplot2  
+  devtools    
+  rCharts  
+  ggmap  
+  animation  
+  XML  
+  ape  
+  ggExtra  
+  ggvis  
+  plotly  
+  devtools  
+  magrittr  
+  highcharter  
+  psych  
+  ggfortify  
+
+## Data Used in This Report
+  Capital Bikeshare hourly data(2011-2012), 17379 observations,16 variables    
+  Capital Bikeshare daily data(2011-2012), 731 observations, 16 variables  
+  2017 Q1 trips history data, 646508 obs., 9 var.   
+  Bike sharing systems in the US by December 2016, 52 obs., 12 var.  
+  Geography data of the United States of America(from google maps)
+  
+## Techniques Used in This Report{.bigger}
+- R (95%)
+- Tableau
+- Excel
+  
+
+#Bike Sharing Systems
+
+##Distribution of Bikesharing Systems in the United States of America at December 2016(Bubble Map)
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+library(ggplot2)
+library(devtools)
+library(rCharts)
+library(ggmap)
+library('animation')
+library(XML)
+setwd('G:\\R?????ӻ?\\????ҵ')
+nacto<-read.csv(file='NACTO.csv',header=T)
+data<-read.csv(file='day.csv')
+data1<-read.csv(file='day1.csv')
+hour<-read.csv("hour.csv",header=T)
+ggmap(get_googlemap(center = 'the United States of America', zoom=4,maptype='terrain'),extent='device')+
+  geom_point(data=nacto,aes(x=lon,y=lat,size=BikesAtLaunch,color=BikesAsOfDecember2016),alpha=0.7)
+```
+
+## Bikesharing Systems{.smaller}
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE, results='asis'}
+library(DT)
+setwd('G:\\R?????ӻ?\\????ҵ')
+nacto<-read.csv("nacto.csv",header=T)
+letter<-c('SysNm','Cntry','State','City','LnchM')
+names(nacto)<-letter
+datatable(nacto, options = list(pageLength = 5))
+```
+
+
+##Phylogenetic Tree of Bikesharing Systems
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE, results='asis'}
+library(ape)
+hc = hclust(dist(nacto))
+plot(as.phylo(hc), type = "fan", tip.color = hsv(runif(15, 0.65, 0.95), 1, 1, 0.7), edge.color = hsv(runif(10, 0.65, 0.75), 1, 1, 0.7), edge.width = runif(20, 0.5, 3), use.edge.length = TRUE, col = "gray80")
+```
+
+##Watercolor Map of Washington DC
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+library(ggmap)
+washingtondc<-'washington dc'
+qmap(washingtondc,zoom=14,source='stamen',maptype='watercolor')
+```
+
+##Three Routes Between Two of the Stations(the Whitehouse and Washington Monument)
+
+```{r, echo=FALSE, fig.retina=0.3,fig.align='center',fig.cap="Routes"}
+knitr::include_graphics("routes.png")
+```
+
+
+##Examples of Two Bike Stations
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+geocode('the white house, Washington DC',output='more')
+from<-c("the white house, Washington DC")
+to<-c("washington monument, Washington DC")
+mapdist(from,to)
+```
+
+#Capital Bikeshare
+
+
+##Introduction to the Variables Used in the Following Research{.smaller}
+* **season** season (1:springer, 2:summer, 3:fall, 4:winter)
+* **yr** year (0: 2011, 1:2012)
+* **mnth** month ( 1 to 12)
+* **hr**  hour (0 to 23)
+* **holiday** weather day is holiday or not (extracted from [Web Link])
+* **weekday** day of the week
+* **workingday**  if day is neither weekend nor holiday is 1, otherwise is 0.
+* **weathersit**
+ 1 Clear, Few clouds, Partly cloudy, Partly cloudy
+ 2 Mist + Cloudy, Mist + Broken clouds, Mist + Few clouds, Mist
+ 3 Light Snow, Light Rain + Thunderstorm + Scattered clouds, Light Rain + Scattered clouds
+ 4 Heavy Rain + Ice Pallets + Thunderstorm + Mist, Snow + Fog
+* **temp**  Normalized temperature in Celsius. The values are derived via (t-t_min)/(t_max-t_min), t_min=-8, t_max=+39 (only in hourly scale)
+* **atemp** Normalized feeling temperature in Celsius. The values are derived via (t-t_min)/(t_max-t_min), t_min=-16, t_max=+50 (only in hourly scale)
+* **hum** Normalized humidity. The values are divided to 100 (max)
+* ** windspeed** Normalized wind speed. The values are divided to 67 (max)
+* **casual** count of casual users
+* **registered** count of registered users
+* **cnt** count of total rental bikes including both casual and registered
+
+
+```{r}
+setwd('G:\\R?????ӻ?\\????ҵ')
+hour<-read.csv("hour.csv",header=T)
+hour$season<-factor(hour$season,levels =c (1,2,3,4),labels=c("spring","summer","autumn","winter"))
+hour$yr<-factor(hour$yr,levels=c(0,1),labels=c("2011","2012"))
+hour$mnth<-factor(hour$mnth,levels=c(1,2,3,4,5,6,7,8,9,10,11,12),labels=c("January","February","Marcy","April","May","June","July","August","September","October","November","December"))
+hour$holiday<-factor(hour$holiday,levels=c(0,1),labels=c("not holiday","holiday"))
+hour$weekday<-factor(hour$weekday,levels=c(1,2,3,4,5,6,0),labels=c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"))
+hour$workingday<-factor(hour$workingday,levels=c(0,1),labels=c("workingday","not workingday"))
+hour$weathersit<-factor(hour$weathersit,levels=c(1,2,3,4),labels=c("Sunny","Cloudy","Light snow or rain","high snow or rain"))
+```
+
+
+## Part of the Table{.smaller}
+
+```{r echo=FALSE,results='asis'}
+setwd('G:\\R?????ӻ?\\????ҵ')
+hour<-read.csv("hour.csv",header=T)
+knitr::kable(head(hour), caption = "Recognition of day")
+```
+
+
+##the Number of Bikes Used Each Day
+
+```{r, echo=FALSE, fig.retina=0.3,fig.align='center',fig.cap="Time Series"}
+knitr::include_graphics("time Series.png")
+```
+
+##Windspeed and Humidity Plot
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+setwd('G:\\R?????ӻ?\\????ҵ')
+hour<-read.csv("hour.csv",header=T)
+library(ggplot2)
+d100<-hour[sample(nrow(hour),100),]
+p4<-ggplot(d100,aes(x=windspeed,y=hum))+geom_smooth(method="lm",level=0,color="red")
+p4
+```
+
+##the Influence of Temperature and Holidays on the Number of Bikes Used
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+hour$weathersit<-factor(hour$weathersit,levels=c(1,2,3,4),labels=c("Sunny","Cloudy","Light snow or rain","high snow or rain"))
+library(ggplot2)
+p5<-ggplot(hour,aes(x=temp,y=cnt,color=factor(holiday)))+geom_point(alpha=0.7)+facet_grid(.~weathersit)
+p5
+```
+
+##The Influence of Humidity on the Number of Bikes used
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+library(ggplot2)
+p1<-ggplot(hour,aes(x=hum,y=cnt))+geom_smooth(method="lm")
+p1
+```
+
+##The Distribution of Temperatures Centralized
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+p2<-ggplot(hour,aes(x=temp))+geom_bar(fill="blue")
+p2
+```
+
+##Temperature and Usage
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+setwd('G:\\R?????ӻ?\\????ҵ')
+hour<-read.csv("hour.csv",header=T)
+library("ggplot2")
+library("ggExtra")
+p <- ggplot(hour, aes(temp, cnt)) + geom_point()
+ggMarginal(p, type = "histogram")
+```
+
+##Windspeed and Usage
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+setwd('G:\\R?????ӻ?\\????ҵ')
+hour<-read.csv("hour.csv",header=T)
+ggplot(hour)+geom_point(aes(cnt,windspeed,color=factor(weathersit)))+scale_x_log10()+facet_grid(~mnth)
+```
+
+##the Number of the usage of Bikes in Different Seasons
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+setwd('G:\\R?????ӻ?\\????ҵ')
+hour<-read.csv("hour.csv",header=T)
+hour$season<-factor(hour$season,levels =c (1,2,3,4),labels=c("spring","summer","autumn","winter"))
+p3<-ggplot(hour,aes(x=season,y=cnt,color=season))+geom_jitter(alpha=0.5)
+p3
+```
+
+##Distribution of the Usage of Bikes
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+setwd('G:\\R?????ӻ?\\????ҵ')
+hour<-read.csv("hour.csv",header=T)
+library(ggvis)
+hour%>%
+  ggvis(~cnt,fill := input_select(label = "Choose color:", choices = c("black", "red", "blue", "green","pink","white"))) %>%
+  layer_densities()
+```
+
+##Casual Users and Registered Users
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+setwd('G:\\R?????ӻ?\\????ҵ')
+hour<-read.csv("hour.csv",header=T)
+library(ggvis)
+hour$yr<-factor(hour$yr,levels=c(0,1),labels=c("2011","2012"))
+hour%>% 
+  group_by(yr)%>%
+ggvis(~casual,~registered,stroke=~factor(yr))%>% 
+layer_smooths()
+```
+
+##Humidity and Usage Scatter Plot
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE}
+setwd('G:\\R?????ӻ?\\????ҵ')
+hour<-read.csv("hour.csv",header=T)
+library(ggvis)
+df<-hour[sample(1:nrow(hour), size = 1000),]
+df%>%
+  ggvis(~hum,~cnt,fillOpacity:=0.5,shape:=input_select(label="Choose shape:",choices=c("circle","square","cross","diamond","triangle-up","triangle-down")), fill:= input_select(label="Choose color:",choices=c("black","red","blue","green","pink","white")))%>%
+layer_points()
+```
+
+
+##Boxplot of the Usage of Bikes on Different Days of Weeks
+```{r echo=FALSE,message=FALSE,warning=FALSE,results='asis'}
+library(plotly)
+library(devtools)
+df<-hour[sample(1:nrow(hour), size = 1000),]
+df$weekday<-factor(df$weekday,levels=c(1,2,3,4,5,6,0),labels=c("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"))
+p6<-ggplot(data=df,aes(x=weekday,y=cnt,fill=factor(weekday)))+geom_boxplot(size =2,notch=T)
+ggplotly(p6)
+```
+
+##Numbers of Usage on Weekdays and Weekends
+```{r echo=FALSE,message=FALSE,warning=FALSE,results='asis'}
+library(plotly)
+library(devtools)
+library(ggplot2)
+setwd('G:\\R?????ӻ?\\????ҵ')
+hour<-read.csv("hour.csv",header=T)
+df<- hour[sample(nrow(hour), 1000), ]
+df$workingday<-factor(df$workingday,levels=c(0,1),labels=c("workingday","not workingday"))
+p7<-ggplot(df,aes(x=hum,y=cnt,fill=factor(workingday)))+geom_point()+geom_smooth(levels=0)
+p7
+```
+
+##Temperature, Windspeed, Humidity and the Nmber of Bikes Used{.smaller}
+```{r echo=FALSE,message=FALSE,warning=FALSE,results='asis'}
+library(magrittr)
+library(highcharter)
+d100<-hour[sample(nrow(hour),100),]
+highchart() %>% 
+  hc_title(text = "Scatter chart with size and color") %>% 
+  hc_add_series_scatter(d100$temp,d100$cnt,d100$windspeed,d100$hum)
+```
+
+## Temperature and Temperature(Feels Like)
+```{r echo=FALSE,message=FALSE,warning=FALSE,results='asis'}
+library(ggvis)
+d100<-hour[sample(nrow(hour),100),]
+d100%>%ggvis(x =~temp,y=~atemp)%>%
+  layer_paths(stroke.hover:="red",strokeWidth.hover:=4,strokeWidth:=2)%>%
+  layer_points(size:=50,size.hover:= 200)%>%
+  set_options(hover_duration = 250)
+```
+
+## Registered Users and Casual Users
+```{r echo=FALSE,message=FALSE,warning=FALSE,results='asis'}
+library(ggvis)
+data %>% ggvis(~casual, ~registered, fill = input_select(label = "Choose fill variable:", choices = names(data), map = as.name))%>% layer_points()
+```
+
+
+##Animate
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE, results='asis'}
+library(gapminder)
+library(ggplot2)
+library(gganimate)
+library("ggplot2")
+library("ggExtra")
+setwd('G:\\R?????ӻ?\\????ҵ')
+hour<-read.csv("hour.csv",header=T)
+p9<-ggplot(hour)+geom_point(aes(temp,cnt,color=weathersit,frame=mnth)) + scale_x_log10()
+gganimate(p9)
+```
+
+#Factor Analysis and Principal Component Analysis
+
+## Formula in Factor Analysis{.build}
+$$X=QF+U+u$$
+
+##Factor Parallel
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+library(psych)
+cor_data<-cor(data1)
+```
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE, results='asis'}
+fa.parallel(cor_data,fa="both")##??ʯͼ
+```
+
+
+##Factor Diagram
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+fa_model_varimax<-fa(cor_data,nfactors=4,rotate='varimax',fm='ml')
+fa_model_varimax
+```
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE, results='asis'}
+fa.diagram(fa_model_varimax,simple = FALSE)
+```
+
+##Factor Plot
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE, results='asis'}
+factor.plot(fa_model_varimax,labels=rownames(fa_model_varimax$loadings))
+```
+
+##Principal Component
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE, results='hide'}
+library(ggfortify)
+principal(cor_data,nfactors=3,rotate='varimax',scores=T)
+df<-data1[,-1]
+```
+```{r echo=FALSE,message=FALSE, warning=FALSE, error=FALSE, results='asis'}
+autoplot(prcomp(df,scale=T),colour='green',lable=T)
+```
+
+
+# Thank you!
+
+
